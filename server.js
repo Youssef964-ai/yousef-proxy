@@ -152,7 +152,7 @@ const htmlContent = `<!DOCTYPE html>
             </div>
         </div>
         <div class="screen-container">
-            <iframe id="coreFrame" src="https://www.youtube.com/embed/3JZ_D3ELwOQ" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+            <iframe id="coreFrame" src="https://www.youtube.com/embed/3JZ_D3ELwOQ" sandbox="allow-scripts allow-same-origin allow-presentation allow-forms" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
         </div>
     </div>
     <script>
@@ -189,7 +189,7 @@ const htmlContent = `<!DOCTYPE html>
         }, 5000);
 
         function extractVideoID(url) {
-            let regExp = /^.*(youtu.be\\/|v\\/|u\\/\\w\\/|embed\\/|watch\\?v=|\\&v=)([^#\\&\\?]*).*/;
+            let regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
             let match = url.match(regExp);
             return (match && match[2].length === 11) ? match[2] : null;
         }
@@ -206,18 +206,19 @@ const htmlContent = `<!DOCTYPE html>
                     frame.src = val;
                 }
             } else {
-                frame.src = 'https://www.youtube.com/embed?q=' + encodeURIComponent(val) + '&autoplay=1';
+                frame.src = 'https://www.youtube.com/embed?listType=search&list=' + encodeURIComponent(val) + '&autoplay=1';
             }
         }
 
         function loadYouTubeHome() {
-            document.getElementById('coreFrame').src = 'https://www.youtube.com/embed/videoseries?list=PLw-VjHDlEOgs658kAHR_LAaILBXb-s6Qc';
+            // فتح صفحة يوتيوب الرئيسية بشكل طبيعي داخل الـ embed
+            document.getElementById('coreFrame').src = 'https://www.youtube.com/embed/?listType=user_uploads&autoplay=1';
         }
 
         function loadSearchMode() {
             let query = prompt("أدخل كلمة البحث المطلوبة:");
             if(query) {
-                document.getElementById('coreFrame').src = 'https://www.youtube.com/embed?q=' + encodeURIComponent(query) + '&autoplay=1';
+                document.getElementById('coreFrame').src = 'https://www.youtube.com/embed?listType=search&list=' + encodeURIComponent(query) + '&autoplay=1';
             }
         }
 
@@ -227,7 +228,10 @@ const htmlContent = `<!DOCTYPE html>
 </html>`;
 
 app.get('/', (req, res) => {
+  // ضبط الـ Headers لضمان توافق الموقع مع خدمات البروكسي مثل CroxyProxy
   res.setHeader('Content-Type', 'text/html; charset=utf-8');
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('X-Frame-Options', 'ALLOWALL');
   res.status(200).send(htmlContent);
 });
 
